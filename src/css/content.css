@@ -1,0 +1,15 @@
+
+.boxContainer {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-gap: 20px;
+  padding: 20px;
+  margin-left: 200px;
+}
+
+@media (max-width: 768px) {
+  .boxContainer {
+    grid-template-columns: 1fr; 
+    margin-left: 0; 
+  }
+}
