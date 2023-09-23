@@ -62,7 +62,6 @@ function App() {
   const handleRegistration = (user) => {
     setUser(user);
     // setIsRegistrationOpen(false);
-    // setIsPromptEnabled(true); // Enable the prompt input after registration
   };
 
   useEffect(() => {
