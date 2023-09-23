@@ -15,6 +15,7 @@ app.use(express.json());
 mongoose.connect(
   "mongodb+srv://neelam30rawat:fdKGNwKppaj06BaV@cluster0.58clcqf.mongodb.net/mern"
 );
+
 // app.use(passport.initialize());
 // app.use(passport.session());
 // Passport configuration for user authentication
@@ -67,13 +68,37 @@ app.post("/registerUser", async (req, res) => {
 
     // Save the user to the userStories collection
     await newUser.save();
-    console.log("in tryyyyyyy333");
+    console.log("in tryyyyyyy333", newUser);
 
     // Return a success message
-    res.status(201).json({ message: "User registered successfully" });
+    res
+      .status(201)
+      .json({ message: "User registered successfully", user: newUser });
   } catch (error) {
     console.error("Error registering user:", error);
     res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+app.post("/login", async (req, res) => {
+  const { username, password } = req.body;
+  if (!username || !password) {
+    res.status(400).json({ message: "Details incomplete" });
+  }
+  try {
+    const user = await UserModel.findOne({ username });
+    if (!user) {
+      res.status(404).json({ message: "User not found" });
+    } else {
+      if (user.password === password) {
+        res.status(200).json({ message: "registration success", user: user });
+      } else {
+        res.status(401).json({ message: "Unauthorized" });
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Smething went wrong" });
   }
 });
 
@@ -85,6 +110,7 @@ app.post("/submitStory", async (req, res) => {
   const { prompt, story } = req.body;
 
   try {
+    console.log(req.user);
     // Create a new story associated with the logged-in user
     const newStory = new storyModel({
       prompt,
@@ -112,14 +138,54 @@ app.post("/submitStory", async (req, res) => {
 //       resp.json(err);
 //     });
 // });
-app.get("/getDetails", async (req, resp) => {
+// : "getAllStories";
+//
+
+app.get("/getAllStories/:userId", async (req, resp) => {
   try {
-    const storiesWithUsers = await storyModel
-      .find({})
-      .populate("user", "username")
+    const userId = req.params.userId;
+    let storiesWithUsers = await storyModel
+      .find()
+      .populate({ path: "user" })
+      .exec();
+    const storyRes = storiesWithUsers.map((story) => {
+      let upVotedByMe = false;
+      if (story.upvotedBy.includes(userId)) {
+        upVotedByMe = true;
+      }
+
+      // Add the upVotedByMe property directly to the story object
+      story.set("upVotedByMe", upVotedByMe, { strict: false });
+
+      return story; // Return the modified story object
+    });
+    console.log(storyRes);
+    resp.json(storyRes);
+  } catch (error) {
+    console.error("Error fetching stories:", error);
+    resp.status(500).json({ error: "Internal server error" });
+  }
+});
+app.get("/getDetails/:id", async (req, resp) => {
+  try {
+    const userId = req.params.id;
+    let storiesWithUsers = await storyModel
+      .find({ user: userId })
+      .populate({ path: "user" })
       .exec();
 
-    resp.json(storiesWithUsers);
+    const storyRes = storiesWithUsers.map((story) => {
+      let upVotedByMe = false;
+      if (story.upvotedBy.includes(userId)) {
+        upVotedByMe = true;
+      }
+
+      // Add the upVotedByMe property directly to the story object
+      story.set("upVotedByMe", upVotedByMe, { strict: false });
+      return story; // Return the modified story object
+    });
+    console.log(storyRes);
+    resp.json(storyRes);
   } catch (error) {
     console.error("Error fetching stories:", error);
     resp.status(500).json({ error: "Internal server error" });
@@ -127,18 +193,28 @@ app.get("/getDetails", async (req, resp) => {
 });
 
 app.post("/setDetails", async (req, resp) => {
-  const story = req.body;
-  const newStory = new storyModel(story);
+  const { story, user } = req.body;
+  const storyToSave = {
+    ...story,
+    user: user._id,
+    upVotedByMe: false,
+  };
+  const newStory = new storyModel(storyToSave);
   await newStory.save();
+  await newStory.populate({ path: "user" });
   resp.json(newStory); //yaha story return kr rahe thi tum and isme _id nhi rahta
 });
-app.put("/upvote/:storyId", async (req, res) => {
+app.put("/upvote/:storyId/:userId", async (req, res) => {
   try {
     const storyId = req.params.storyId;
-
+    const userId = req.params.userId;
     // Retrieve the story from the database
     const story = await storyModel.findById(storyId);
-
+    if (story.upvotedBy.includes(userId)) {
+      res.status(400).json({ message: "Already upvoted" });
+      return;
+    }
+    story.upvotedBy.push(userId);
     // Increment the upvotes
     story.upvotes += 1;
 
@@ -151,6 +227,31 @@ app.put("/upvote/:storyId", async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
+app.put("/downVote/:storyId/:userId", async (req, res) => {
+  try {
+    const storyId = req.params.storyId;
+    const userId = req.params.userId;
+    // Retrieve the story from the database
+    const story = await storyModel.findById(storyId);
+    if (!story.upvotedBy.includes(userId)) {
+      res.status(400).json({ message: "Not upvoted yet" });
+      return;
+    }
+    story.upvotedBy = story.upvotedBy.filter((id) => id != userId);
+    // Increment the upvotes
+    story.upvotes -= 1;
+
+    // Save the updated story with the new upvotes count
+    await story.save();
+
+    res.status(200).json({ message: "Upvote successful" });
+  } catch (error) {
+    console.error("Error upvoting story:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 app.get("/checkUsername/:username", async (req, res) => {
   const { username } = req.params;
   console.log("heyyyy");

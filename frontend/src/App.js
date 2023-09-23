@@ -41,9 +41,17 @@ function App() {
   const [stories, setStories] = useState([]);
   const [isRegistrationOpen, setIsRegistrationOpen] = useState(true);
   const [isPromptEnabled, setIsPromptEnabled] = useState(false); // Add a state for enabling the prompt input
-  const fetchStories = async () => {
+  const [user, setUser] = useState({});
+  const [myStory, setMyStory] = useState(true);
+  const fetchStories = async (user, myStory) => {
     try {
-      const response = await Axios.get("http://localhost:3001/getDetails");
+      if (!user._id) {
+        return;
+      }
+      const subUrl = myStory ? "getDetails/" : "getAllStories/";
+      const url = "http://localhost:3001/" + subUrl + user._id;
+      console.log(url);
+      const response = await Axios.get(url);
       const fetchedStories = response.data;
       setStories(fetchedStories);
     } catch (error) {
@@ -51,21 +59,24 @@ function App() {
     }
   };
 
-  const handleRegistration = () => {
-    setIsRegistrationOpen(false);
-    setIsPromptEnabled(true); // Enable the prompt input after registration
+  const handleRegistration = (user) => {
+    setUser(user);
+    // setIsRegistrationOpen(false);
+    // setIsPromptEnabled(true); // Enable the prompt input after registration
   };
 
   useEffect(() => {
-    fetchStories();
-  }, []);
+    console.log("useEffect", myStory);
+    fetchStories(user, myStory);
+  }, [user, myStory]);
 
   const handlePromptSubmit = async (prompt) => {
     try {
       const response = await Axios.post("http://localhost:3001/setDetails", {
-        prompt,
-        story: "",
-        upvotes: 0,
+        story: { prompt, story: "", upvotes: 0 },
+        user: {
+          _id: user?._id,
+        },
       });
       const newStory = response.data;
       setStories((prev) => [...prev, newStory]);
@@ -75,17 +86,39 @@ function App() {
   };
 
   return (
-    <div className="App">
+    <div
+      className="App"
+      style={{
+        backgroundColor: "#F1EFEF",
+        width: "100%",
+        height: "100vh",
+      }}
+    >
       <h1>Story Prompter</h1>
-      {isRegistrationOpen && (
+      {!user._id ? (
         <RegisterForm onRegistration={handleRegistration} />
-      )}
-      {isPromptEnabled && (
+      ) : (
         <>
           <StoryForm onPromptSubmit={handlePromptSubmit} />
           <div className="story-container">
+            <div>
+              <button
+                onClick={() => {
+                  setMyStory(true);
+                }}
+              >
+                My stories
+              </button>
+              <button
+                onClick={() => {
+                  setMyStory(false);
+                }}
+              >
+                All stories
+              </button>
+            </div>
             {stories.map((story, index) => (
-              <StoryCard key={index} story={story} />
+              <StoryCard key={index} story={story} user={user} />
             ))}
           </div>
         </>

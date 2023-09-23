@@ -60,7 +60,6 @@
 // }
 import React, { useState } from "react";
 import Axios from "axios";
-
 function RegisterForm({ onRegistration }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -76,12 +75,13 @@ function RegisterForm({ onRegistration }) {
         return;
       }
 
-      await Axios.post("http://localhost:3001/registerUser", {
+      const userResp = await Axios.post("http://localhost:3001/registerUser", {
         username,
         password,
       });
+      console.log("user", userResp.data);
 
-      onRegistration();
+      onRegistration(userResp.data.user);
 
       setUsername("");
       setPassword("");
@@ -91,26 +91,56 @@ function RegisterForm({ onRegistration }) {
     }
   };
 
+  const handleLogin = async () => {
+    try {
+      const userResp = await Axios.post("http://localhost:3001/login", {
+        username,
+        password,
+      });
+      console.log("user", userResp.data);
+
+      onRegistration(userResp.data.user);
+
+      setUsername("");
+      setPassword("");
+      setIsUsernameTaken(false);
+    } catch (error) {
+      console.error("Error Logginf in  user:", error);
+    }
+  };
+
   return (
-    <div>
-      <h2>Register</h2>
-      <input
-        type="text"
-        placeholder="Username"
-        value={username}
-        required
-        onChange={(e) => setUsername(e.target.value)}
-      />
-      <input
-        type="password"
-        placeholder="Password"
-        value={password}
-        required
-        onChange={(e) => setPassword(e.target.value)}
-      />
-      <button onClick={handleRegister}>Register</button>
-      {isUsernameTaken && <p>Username is already taken.</p>}
-    </div>
+    <>
+      <div className="register-form">
+        <h2>Register</h2>
+        <input
+          type="text"
+          placeholder="Username"
+          value={username}
+          required
+          onChange={(e) => setUsername(e.target.value)}
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          required
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <div className="button-container">
+          <button className="register-button" onClick={handleRegister}>
+            Register
+          </button>
+          {isUsernameTaken && (
+            <p className="error-message">Username is already taken.</p>
+          )}
+          <span className="or-text">OR</span>
+          <button className="login-button" onClick={handleLogin}>
+            Login
+          </button>
+        </div>
+      </div>
+    </>
   );
 }
 
