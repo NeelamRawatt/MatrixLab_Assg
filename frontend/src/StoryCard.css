@@ -1,4 +1,4 @@
-/* StoryCard.css */
+/* StoryCard.css
 
 .story-card {
   background-color: #fff;
@@ -33,4 +33,101 @@
 
 .story-card button:hover {
   background-color: #0056b3;
+} */
+
+.story-card {
+  border: 1px solid #ccc;
+  padding: 16px;
+  margin: 16px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.user-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 8px;
+  object-fit: cover;
+}
+
+.username {
+  font-weight: bold;
+}
+
+.post-text {
+  margin-bottom: 16px;
+}
+
+.upvote-container {
+  display: flex;
+  align-items: center;
+}
+
+.upvote-button {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  /* font-size: 24px; */
+ 
+}
+
+.save-button {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  /* font-size: 24px; */
+ 
+}
+
+.share-button {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 24px;
+  margin-right: 8px;
+}
+
+.upvotes {
+  font-size: 16px;
+}
+
+.dislikeIcon{
+width: 40px;
+height:40px;
+margin-left: -10px;
+
+}
+.likeIcon{
+width: 40px;
+height:40px;
+margin-left: -10px;
+
+}
+
+.saveIcon{
+width: 30px;
+height:25px;
+margin-left:-20px; 
+margin-top: -10px;
+cursor: pointer;
+
+}
+
+.shareIcon{
+width: 30px;
+height:22px;
+margin-left: -30px; 
+margin-top: -10px;
+cursor: pointer;
+
+
+
 }

@@ -1,37 +1,22 @@
-// // StoryCard.js
-// import React, { useState } from "react";
-// import "../StoryCard.css";
-// function StoryCard({ prompt, story }) {
-//   const [upvotes, setUpvotes] = useState(0);
-
-//   const handleUpvote = () => {
-//     setUpvotes(upvotes + 1);
-//   };
-
-//   return (
-//     <div className="story-card">
-//       <h3>Prompt:</h3>
-//       <p>{prompt}</p>
-//       <h3>Generated Story:</h3>
-//       <p>{story}</p>
-//       <button onClick={handleUpvote}>Upvote ({upvotes})</button>
-//     </div>
-//   );
-// }
-
-// export default StoryCard;
 import React, { useEffect, useState } from "react";
+import "../StoryCard.css";
 import Axios from "axios";
+import avatar from "../images/avatar.svg";
+import like from "../images/like.jpg";
+import dislike from "../images/dislike.png";
+import save from "../images/save.png";
+import share from "../images/share.png";
+import moment from "moment";
 function StoryCard({ story, user }) {
   console.log(story?.upVotedByMe);
-  const [upvotes, setUpvotes] = useState(story?.upvotes); //jb bhi load hoga to initial value bakcend se set nhi kr rahi thi ab hoga
+  const [upvotes, setUpvotes] = useState(story?.upvotes);
   const [upVotedByMe, setUpVotedByMe] = useState(story?.upVotedByMe);
   const handleUpvote = async () => {
     try {
       const subUrl = upVotedByMe ? "downvote" : "upvote";
       console.log(`http://localhost:3001/${subUrl}/${story._id}`);
       const response = await Axios.put(
-        `http://localhost:3001/${subUrl}/${story._id}/${user._id}` //and yaha undefined jaa raha tha
+        `http://localhost:3001/${subUrl}/${story._id}/${user._id}`
       );
       if (response.status === 200) {
         if (upVotedByMe) {
@@ -39,37 +24,73 @@ function StoryCard({ story, user }) {
         } else {
           setUpvotes((prev) => prev + 1);
         }
-        //kabi bhi kisi bhi state ko khud ke value se update krna hoga to use this syntax
         setUpVotedByMe((prev) => !prev);
-        // setUpvotes(upvotes+1)  //this will work BUt supoose useEffect ke andar se ye function call hota and upvote dependency array me nhi hota useEffect ke to usko hr baar upvote ka initial value milega
       }
     } catch (error) {
       console.error("Error upvoting story:", error);
     }
   };
+  // const handleShareClick = () => {
 
-  // const [count, setCount] = useState(0);
-  // useEffect(() => {
-  //   const interval = setInterval(() => {
-  //     setCount((prev) => prev + 1);
-  //     console.log(count, "updated");
-  //   }, 1000);
-  //   return () => {
-  //     clearInterval(interval);
-  //   };
-  // }, []);
+  //   if (navigator.share) {
+  //     const storyUrl = `${window.location.origin}/story/${story._id}`;
+  //     navigator
+  //       .share({
+  //         title: "Share this story",
+  //         text: story.prompt,
+  //         url: storyUrl,
+  //       })
+  //       .then(() => {
+  //         console.log("Story shared successfully");
+  //       })
+  //       .catch((error) => {
+  //         console.error("Error sharing story:", error);
+  //       });
+  //   } else {
+  //     console.log("Web Share API not supported");
+  //   }
+  // };
+  const handleShareClick = () => {
+    const storyUrl = `/story/${story._id}`; // Replace 'story.id' with the actual story identifier
+    window.location.href = storyUrl;
+  };
 
   return (
     <div className="story-card">
+      <div className="user-info">
+        <img className="user-icon" src={avatar} alt="User Icon" />
+        <p className="username">{story?.user?.username}</p>
+      </div>
       <p className="post-text">{story.prompt}</p>
       <div className="upvote-container">
         <button className="upvote-button" onClick={handleUpvote}>
           <span role="img" aria-label="heart emoji">
-            {upVotedByMe ? "❤️" : "💔"}
+            {upVotedByMe ? (
+              <img src={dislike} alt="DisLike" className="dislikeIcon" />
+            ) : (
+              <img src={like} alt="Like" className="likeIcon" />
+            )}
           </span>
         </button>
-        <p className="upvotes">Upvotes: {upvotes}</p>
-        <p className="upvotes">Submitted by: {story?.user?.username}</p>
+        <p
+          className="upvotes"
+          style={{
+            marginRight: "100px",
+            marginLeft: "-60px",
+            marginTop: "-15px",
+          }}
+        >
+          {upvotes}
+        </p>
+        {/* <button> */}
+        <img src={save} alt="save" className="saveIcon" />
+        {/* </button> */}
+        {/* <button> */}
+        <a href="#" onClick={handleShareClick}>
+          <img src={share} alt="Share" className="shareIcon" />
+        </a>
+        {/* {moment(story?.createdAt).format("yyyy-MM-dd h:mm:ss")} */}
+        {/* </button> */}
       </div>
     </div>
   );

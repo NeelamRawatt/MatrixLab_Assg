@@ -22,6 +22,10 @@ const storySchema = new mongoose.Schema({
       ref: "userStoris",
     },
   ],
+  createdAt: {
+    type: Date,
+    default: new Date().toISOString(),
+  },
 });
 // collection and userSchema
 const storyModel = mongoose.model("stories", storySchema);

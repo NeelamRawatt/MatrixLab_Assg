@@ -16,9 +16,6 @@ mongoose.connect(
   "mongodb+srv://neelam30rawat:fdKGNwKppaj06BaV@cluster0.58clcqf.mongodb.net/mern"
 );
 
-// app.use(passport.initialize());
-// app.use(passport.session());
-// Passport configuration for user authentication
 passport.use(
   new LocalStrategy(
     {
@@ -128,18 +125,6 @@ app.post("/submitStory", async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 });
-// app.get("/getDetails", (req, resp) => {
-//   storyModel
-//     .find({})
-//     .then(function (stories) {
-//       resp.json(stories);
-//     })
-//     .catch(function (err) {
-//       resp.json(err);
-//     });
-// });
-// : "getAllStories";
-//
 
 app.get("/getAllStories/:userId", async (req, resp) => {
   try {
@@ -272,6 +257,39 @@ app.get("/checkUsername/:username", async (req, res) => {
     }
   } catch (error) {
     console.error("Error checking username availability:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.get("/mostUpvotedStories", async (req, res) => {
+  try {
+    const mostUpvotedStories = await storyModel
+      .find({})
+      .populate({ path: "user" })
+      .sort({ upvotes: -1 })
+      .exec();
+    mostUpvotedStories.forEach((story) => {
+      console.log(story?.upvotes);
+    });
+    res.json(mostUpvotedStories);
+  } catch (error) {
+    console.error("Error fetching most upvoted stories:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+app.get("/getStory/:storyId", async (req, res) => {
+  const storyId = req.params.storyId;
+
+  try {
+    // Fetch the story from the database based on storyId
+    const story = await storyModel.findById(storyId);
+    if (!story) {
+      return res.status(404).json({ message: "Story not found" });
+    }
+
+    res.json(story);
+  } catch (error) {
+    console.error("Error fetching story:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 });

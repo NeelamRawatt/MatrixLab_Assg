@@ -110,37 +110,37 @@ function RegisterForm({ onRegistration }) {
   };
 
   return (
-    <>
-      <div className="register-form">
-        <h2>Register</h2>
-        <input
-          type="text"
-          placeholder="Username"
-          value={username}
-          required
-          onChange={(e) => setUsername(e.target.value)}
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          required
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <div className="button-container">
-          <button className="register-button" onClick={handleRegister}>
-            Register
-          </button>
-          {isUsernameTaken && (
-            <p className="error-message">Username is already taken.</p>
-          )}
-          <span className="or-text">OR</span>
-          <button className="login-button" onClick={handleLogin}>
-            Login
-          </button>
-        </div>
+    <div className="register-form">
+      <h2>Register</h2>
+      <input
+        type="text"
+        placeholder="Username"
+        value={username}
+        required
+        style={{ marginBottom: "10px" }}
+        onChange={(e) => setUsername(e.target.value)}
+      />
+      <input
+        type="password"
+        placeholder="Password"
+        value={password}
+        required
+        style={{ marginBottom: "10px" }}
+        onChange={(e) => setPassword(e.target.value)}
+      />
+      <div className="button-container">
+        <button className="register-button" onClick={handleRegister}>
+          Register
+        </button>
+        {isUsernameTaken && (
+          <p className="error-message">Username is already taken.</p>
+        )}
+        <span className="or-text">OR</span>
+        <button className="login-button" onClick={handleLogin}>
+          Login
+        </button>
       </div>
-    </>
+    </div>
   );
 }
 
